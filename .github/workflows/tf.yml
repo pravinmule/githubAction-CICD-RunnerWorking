@@ -10,19 +10,22 @@ permissions:
 
 jobs:
   build:
-    name: Terraform VPC Deployment
     runs-on: [self-hosted, amazonlinux, dev]
 
     env:
       AWS_DEFAULT_REGION: ap-south-1
 
     steps:
-      # Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Check Terraform installation
-      - name: Terraform Version
+      # Install Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Check Terraform Version
         run: terraform version
 
       # AWS OIDC Authentication
@@ -32,22 +35,17 @@ jobs:
           role-to-assume: arn:aws:iam::453019403268:role/GitHubActions-VPC-Role
           aws-region: ap-south-1
 
-      # Verify AWS connection
       - name: Verify AWS Identity
         run: aws sts get-caller-identity
 
-      # Initialize Terraform
       - name: Terraform Init
         run: terraform init
 
-      # Validate Terraform code
       - name: Terraform Validate
         run: terraform validate
 
-      # Generate execution plan
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      # Create AWS infrastructure
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
