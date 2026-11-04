@@ -1,48 +1,21 @@
-# on:
-#   push:
-#     branches: [ main ]
-#   workflow_dispatch:   # ✅ Manual trigger only
-# jobs:
-#   terraform:
-#     name: first gitaction
-#     runs-on: ubuntu-latest
-#     env:
-#       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#       AWS_DEFAULT_REGION: ap-south-1 # change if needed
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v3
-#         with:
-#           terraform_version: 1.9.8
-#       - name: Terraform Init
-#         run: terraform init
-#       - name: Terraform plan
-#         run: terraform plan -out=tfplan
-#       # - name: Terraform Apply
-#       #   run: terraform apply -auto-approve tfplan
-#       - name: Terraform Destroy
-#         run: terraform destroy -auto-approve tfplan
 
-
-
-name: Terraform Deploy
+name: Terraform VPC using OIDC
 
 on:
   # push:
   #   branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  plan:
-    name: Terraform plan
+  terraform:
+    name: first gitaction
     runs-on: ubuntu-latest
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ap-south-1
 
     steps:
@@ -51,47 +24,29 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      # AWS Authentication using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::453019403268:role/OIDC_role
+          aws-region: ap-south-1
+
+      # Verify AWS Authentication
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
 
       - name: Terraform Init
         run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
 
-  apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    needs: plan
-    environment: production   # 👈 requires manual approval
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ap-south-1
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+      # Destroy infrastructure (optional)
+      # - name: Terraform Destroy
+      #   run: terraform destroy -auto-approve
