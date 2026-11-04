@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, amazonlinux, dev]  # Matches labels of self-hosted runner
+    env:
+      AWS_DEFAULT_REGION: ap-south-1
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
