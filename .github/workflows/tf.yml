@@ -3,22 +3,38 @@ name: Terraform CI Pipeline
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform:
     runs-on: [self-hosted, amazonlinux, dev]
 
     steps:
-      - name: Checkout Code
+      # Step 1: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v4
 
+      # Step 2: Authenticate with AWS using OIDC
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::453019403268:role/OIDC_role
+          aws-region: ap-south-1
+
+      # Step 3: Verify AWS authentication
+      - name: Verify AWS Identity
+        run: aws sts get-caller-identity
+
+      # Step 4: Terraform Init
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Validate
-        run: terraform validate
-
+      # Step 5: Terraform Plan
       - name: Terraform Plan
         run: terraform plan
 
+      # Step 6: Terraform Apply
       - name: Terraform Apply
         run: terraform apply -auto-approve
