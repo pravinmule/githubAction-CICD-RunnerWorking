@@ -5,7 +5,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 jobs:
-  build:
+  terraform:
     runs-on: [self-hosted, amazonlinux, dev]  # Matches labels of self-hosted runner
     steps:
       - name: Checkout Code
