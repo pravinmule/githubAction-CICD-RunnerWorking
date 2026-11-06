@@ -1,4 +1,4 @@
-name: Terraform CI Pipeline
+name: Terraform CI Pipeline runner
 
 on:
   workflow_dispatch:
