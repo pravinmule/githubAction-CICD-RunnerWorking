@@ -1,18 +1,24 @@
-
-name: CI Pipeline on Self-Hosted Runner
+name: Terraform CI Pipeline
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   terraform:
-    runs-on: [self-hosted, amazonlinux, dev]  # Matches labels of self-hosted runner
+    runs-on: [self-hosted, amazonlinux, dev]
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build
-        run: echo "Building on self-hosted runner"
+      - name: Terraform Init
+        run: terraform init
 
-      - name: Test
-        run: echo "Testing on self-hosted runner"
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
