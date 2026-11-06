@@ -1,6 +1,9 @@
-#   paste EC2
 
-#install terrafrom ((https://developer.hashicorp.com/terraform/install))
+#create EC2
+# attach Iam role with awsfullaccess
+
+#inside ec2
+#install terrafrom ((https://developer.hashicorp.com/terraform/install)) inside ec2
 
 sudo yum install -y yum-utils shadow-utils
 sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
